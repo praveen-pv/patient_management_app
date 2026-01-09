@@ -16,8 +16,8 @@ import 'core/common/routes.dart';
 void main() {
   runApp(
     DevicePreview(
-      enabled: kDebugMode,
-      // builder: (context) => const MyApp(),
+   //   enabled: kDebugMode,
+
 
       builder: (context) {
         return

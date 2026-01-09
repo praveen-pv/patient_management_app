@@ -95,269 +95,271 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Colors.white,
       appBar: const CustomAppBar(title: "Register"),
 
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(29.w),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _label("Name"),
-              CustomTextField(
-                  hint: "Enter your full name",
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(29.w),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _label("Name"),
+                CustomTextField(
+                    hint: "Enter your full name",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+            
+                      return null;
+                    },
+                    controller: nameCtrl
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Whatsapp Number"),
+                CustomTextField(
+                  hint: "Enter your Whatsapp number",
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
+                      return 'Please enter your Whatsapp number';
                     }
-          
+            
                     return null;
                   },
-                  controller: nameCtrl
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Whatsapp Number"),
-              CustomTextField(
-                hint: "Enter your Whatsapp number",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your Whatsapp number';
-                  }
-          
-                  return null;
-                },
-                controller: phoneCtrl,
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Address"),
-              CustomTextField(
-                hint: "Enter your  address",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your address';
-                  }
-          
-                  return null;
-                },
-                controller: addressCtrl,
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Location"),
-              CustomDropdownField(
-                hint: "Choose your location",
-          
-                value: selectedLocation,
-                items: locations,
-          
-                onChanged: (val) {
-                  setState(() => selectedLocation = val);
-                },
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Branch"),
-              Consumer<RegisterProvider>(
-                builder: (context, provider, _) {
-                  if (provider.isBranchLoading) {
-                    return Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Center(child: CircularProgressIndicator()),
+                  controller: phoneCtrl,
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Address"),
+                CustomTextField(
+                  hint: "Enter your  address",
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your address';
+                    }
+            
+                    return null;
+                  },
+                  controller: addressCtrl,
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Location"),
+                CustomDropdownField(
+                  hint: "Choose your location",
+            
+                  value: selectedLocation,
+                  items: locations,
+            
+                  onChanged: (val) {
+                    setState(() => selectedLocation = val);
+                  },
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Branch"),
+                Consumer<RegisterProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.isBranchLoading) {
+                      return Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+            
+                    if (provider.branchReportList.isEmpty) {
+                      return const Text("No branches found");
+                    }
+            
+                    return CustomDropdownField(
+                      hint: "Select the branch",
+                      value: provider.selectedBranchName,
+                      items: provider.branchReportList
+                          .map((branch) => branch.name)
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          provider.selectBranch(value);
+                        }
+                      },
                     );
-                  }
-          
-                  if (provider.branchReportList.isEmpty) {
-                    return const Text("No branches found");
-                  }
-          
-                  return CustomDropdownField(
-                    hint: "Select the branch",
-                    value: provider.selectedBranchName,
-                    items: provider.branchReportList
-                        .map((branch) => branch.name)
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        provider.selectBranch(value);
-                      }
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 16.h),
-          
-              if (selectedTreatments.isEmpty)
-                _addTreatmentButton(color: Pallette.primaryColor),
-          
-              const SizedBox(height: 16),
-          
-              Column(
-                children: List.generate(
-                  selectedTreatments.length,
-                  (index) => TreatmentCard(
-                    index: index + 1,
-                    treatment: selectedTreatments[index],
-                    onRemove: () {
-                      setState(() => selectedTreatments.removeAt(index));
-                    },
+                  },
+                ),
+                SizedBox(height: 16.h),
+            
+                if (selectedTreatments.isEmpty)
+                  _addTreatmentButton(color: Pallette.primaryColor),
+            
+                const SizedBox(height: 16),
+            
+                Column(
+                  children: List.generate(
+                    selectedTreatments.length,
+                    (index) => TreatmentCard(
+                      index: index + 1,
+                      treatment: selectedTreatments[index],
+                      onRemove: () {
+                        setState(() => selectedTreatments.removeAt(index));
+                      },
+                    ),
                   ),
                 ),
-              ),
-          
-              if (selectedTreatments.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                _addTreatmentButton(color: Colors.green),
-              ],
-          
-              SizedBox(height: 24.h),
-          
-              _label("Total Amount"),
-              CustomTextField(
-                hint: "Enter your Total Amount",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your Total Amount';
-                  }
-          
-                  return null;
-                },
-                controller: totalCtrl,
-
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Discount Amount"),
-              CustomTextField(
-                hint: "Enter your Discount Amount",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your Discount Amount';
-                  }
-          
-                  return null;
-                },
-                controller: discountCtrl,
-              ),
-          
-              SizedBox(height: 20.h),
-          
-              _label("Payment Option"),
-              Row(
-                children: [
-                  _paymentRadio("Cash"),
-                  _paymentRadio("Card"),
-                  _paymentRadio("UPI"),
+            
+                if (selectedTreatments.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _addTreatmentButton(color: Colors.green),
                 ],
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Advance Amount"),
-              CustomTextField(
-                hint: "Enter your Advance Amount",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your Advance Amount';
-                  }
-          
-                  return null;
-                },
-                controller: advanceCtrl,
-              ),
-          
-              SizedBox(height: 16.h),
-          
-              _label("Balance Amount"),
-              CustomTextField(
-                hint: "Enter your Balance Amount",
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your Balance Amount';
-                  }
-          
-                  return null;
-                },
-                controller: balanceCtrl,
-              ),
-          
-              SizedBox(height: 20.h),
-          
-              _label("Treatment Date"),
-              InkWell(
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2023),
-                    lastDate: DateTime(2030),
-                  );
-                  if (picked != null) {
-                    setState(() => treatmentDate = picked);
-                  }
-                },
-                child: Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Pallette.bgGrey,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          treatmentDate == null
-                              ? ""
-                              : "${treatmentDate!.day.toString().padLeft(2, '0')}/"
-                                    "${treatmentDate!.month.toString().padLeft(2, '0')}/"
-                                    "${treatmentDate!.year}",
-                          style: TextStyle(fontSize: 14.sp),
+            
+                SizedBox(height: 24.h),
+            
+                _label("Total Amount"),
+                CustomTextField(
+                  hint: "Enter your Total Amount",
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your Total Amount';
+                    }
+            
+                    return null;
+                  },
+                  controller: totalCtrl,
+        
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Discount Amount"),
+                CustomTextField(
+                  hint: "Enter your Discount Amount",
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your Discount Amount';
+                    }
+            
+                    return null;
+                  },
+                  controller: discountCtrl,
+                ),
+            
+                SizedBox(height: 20.h),
+            
+                _label("Payment Option"),
+                Row(
+                  children: [
+                    _paymentRadio("Cash"),
+                    _paymentRadio("Card"),
+                    _paymentRadio("UPI"),
+                  ],
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Advance Amount"),
+                CustomTextField(
+                  hint: "Enter your Advance Amount",
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your Advance Amount';
+                    }
+            
+                    return null;
+                  },
+                  controller: advanceCtrl,
+                ),
+            
+                SizedBox(height: 16.h),
+            
+                _label("Balance Amount"),
+                CustomTextField(
+                  hint: "Enter your Balance Amount",
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your Balance Amount';
+                    }
+            
+                    return null;
+                  },
+                  controller: balanceCtrl,
+                ),
+            
+                SizedBox(height: 20.h),
+            
+                _label("Treatment Date"),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2023),
+                      lastDate: DateTime(2030),
+                    );
+                    if (picked != null) {
+                      setState(() => treatmentDate = picked);
+                    }
+                  },
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    decoration: BoxDecoration(
+                      color: Pallette.bgGrey,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            treatmentDate == null
+                                ? ""
+                                : "${treatmentDate!.day.toString().padLeft(2, '0')}/"
+                                      "${treatmentDate!.month.toString().padLeft(2, '0')}/"
+                                      "${treatmentDate!.year}",
+                            style: TextStyle(fontSize: 14.sp),
+                          ),
                         ),
-                      ),
-                      const Icon(
-                        Icons.calendar_month,
-                        color: Pallette.primaryColor,
-                      ),
-                    ],
+                        const Icon(
+                          Icons.calendar_month,
+                          color: Pallette.primaryColor,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          
-              SizedBox(height: 20.h),
-          
-              _label("Treatment Time"),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomDropdownField(
-                      hint: "Hour",
-                      value: hour,
-                      items: List.generate(12, (i) => "${i + 1}"),
-                      onChanged: (v) => setState(() => hour = v),
+            
+                SizedBox(height: 20.h),
+            
+                _label("Treatment Time"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomDropdownField(
+                        hint: "Hour",
+                        value: hour,
+                        items: List.generate(12, (i) => "${i + 1}"),
+                        onChanged: (v) => setState(() => hour = v),
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: CustomDropdownField(
-                      hint: "Minutes",
-                      value: minute,
-                      items: const ["00", "15", "30", "45"],
-                      onChanged: (v) => setState(() => minute = v),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: CustomDropdownField(
+                        hint: "Minutes",
+                        value: minute,
+                        items: const ["00", "15", "30", "45"],
+                        onChanged: (v) => setState(() => minute = v),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-          
-              SizedBox(height: 30.h),
-          
-              CustomButton(text: "Save", onTap: _prepareApiData),
-            ],
+                  ],
+                ),
+            
+                SizedBox(height: 30.h),
+            
+                CustomButton(text: "Save", onTap: _prepareApiData),
+              ],
+            ),
           ),
         ),
       ),
@@ -443,7 +445,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final registerdata = {
       "name": nameCtrl.text.trim(),
       //"excecutive": "test_user",
-      "excecutive": "Admin",
+      "excecutive": "excecutive",
       "phone": phoneCtrl.text.trim(),
       "address": addressCtrl.text.trim(),
       "payment": paymentMode,
