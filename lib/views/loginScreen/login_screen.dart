@@ -26,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
 final formKey = GlobalKey<FormState>();
 
+bool ispasswordVisible = true;
   @override
   void dispose() {
     usernameController.dispose();
@@ -159,7 +160,14 @@ final formKey = GlobalKey<FormState>();
                             }
                             return null;
                           },
-                          isPassword: true,
+                          isPassword: ispasswordVisible,
+                          icon: IconButton(onPressed: (){
+                            setState(() {
+                              ispasswordVisible=!ispasswordVisible;
+                            });
+
+
+                          }, icon: ispasswordVisible?Icon(Icons.visibility_off_outlined):Icon(Icons.visibility))
                         ),
 
                         SizedBox(height: 30.h),

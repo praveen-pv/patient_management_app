@@ -3,14 +3,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final bool isHome;
   final VoidCallback? onBack;
   final VoidCallback? onNotification;
+  final VoidCallback? onLogout;
 
   const CustomAppBar({
     super.key,
     required this.title,
+    this.isHome = false,
     this.onBack,
     this.onNotification,
+    this.onLogout,
   });
 
   @override
@@ -18,10 +22,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.white,
-      leading: IconButton(
+
+
+      leading: isHome
+          ? null
+          : IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.black),
         onPressed: onBack ?? () => Navigator.pop(context),
       ),
+
       title: Text(
         title,
         style: TextStyle(
@@ -31,15 +40,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
+
+      // 🔹 ACTIONS
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_none, color: Colors.black),
-          onPressed: onNotification,
-        ),
+        if (onNotification != null)
+          IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.black),
+            onPressed: onNotification,
+          ),
+
+        // 🔥 LOGOUT ONLY FOR HOME
+        if (isHome)
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.red),
+            onPressed: onLogout,
+          ),
       ],
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+

@@ -37,6 +37,13 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    applicationVariants.all {
+        outputs.all {
+            val versionNameValue = versionName ?: ""
+            val newApkName = "Patient.apk"
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = newApkName
+        }
+    }
 }
 
 flutter {

@@ -36,11 +36,20 @@ class PatientRepository implements PatientRepo {
         print("get Patient list: ${response.body}");
       }
       if (response.statusCode == 200 || response.statusCode == 201) {
-        List data = jsonDecode(response.body)["patient"] ?? [];
-        return data.map((e) => PatientModel.fromJson(e)).toList();
+        return compute(_parsePatients, response.body);
+        // List data = jsonDecode(response.body)["patient"] ?? [];
+        // return data.map((e) => PatientModel.fromJson(e)).toList();
       }
     } catch (e) {
       debugPrint(e.toString());
     }
     return null;
-  }}
+  }
+
+  List<PatientModel> _parsePatients(String responseBody) {
+    final decoded = jsonDecode(responseBody);
+    final List data = decoded["patient"] ?? [];
+    return data.map((e) => PatientModel.fromJson(e)).toList();
+  }
+
+}

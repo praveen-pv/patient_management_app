@@ -29,14 +29,14 @@ class PatientCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          /// 🔹 MAIN CONTENT
+
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
 
-                /// NAME
+
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -62,7 +62,7 @@ class PatientCard extends StatelessWidget {
 
                 const SizedBox(height: 4),
 
-                /// TREATMENT (WRAPS SAFELY)
+
                 Text(
                   treatment.isNotEmpty ? treatment : "Not under treatment",
                   style: const TextStyle(
@@ -74,7 +74,7 @@ class PatientCard extends StatelessWidget {
 
                 const SizedBox(height: 6),
 
-                /// DATE + STAFF
+
                 Row(
                   children: [
                     const Icon(Icons.calendar_month,
@@ -100,10 +100,10 @@ class PatientCard extends StatelessWidget {
             ),
           ),
 
-          /// 🔹 DIVIDER (IMPORTANT)
+
           const Divider(height: 1, thickness: 0.6),
 
-          /// 🔹 BOTTOM ACTION ROW (PERFECT ALIGNMENT)
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(

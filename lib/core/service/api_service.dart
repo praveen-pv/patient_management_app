@@ -1,7 +1,7 @@
 class ApiService {
   static const baseUrl = "https://flutter-amr.noviindus.in/api";
 
-  //! Auth
+  // Auth
   static const loginUrl = "$baseUrl/Login";
   static const patientUrl = "$baseUrl/PatientList";
   static const registerUrl = "$baseUrl/PatientUpdate";

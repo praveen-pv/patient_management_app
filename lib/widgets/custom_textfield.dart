@@ -7,7 +7,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final bool isPassword;
   final String? Function(String?)? validator;
-  final Icon? icon;
+  final Widget? icon;
 
   const CustomTextField({
     super.key,
@@ -25,10 +25,11 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: controller,
+
       obscureText: isPassword,
       decoration: InputDecoration(
         hintText: hint,
-        prefixIcon: icon,
+        suffixIcon: icon,
         filled: true,
         fillColor: Pallette.bgGrey,
         contentPadding: EdgeInsets.symmetric(

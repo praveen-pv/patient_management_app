@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:patient_management_app/views/registerScreen/register_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/common/utils.dart';
 import '../../providers/patientProvider/patient_provider.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/patient_card.dart';
 import '../../core/common/colors.dart';
+import '../loginScreen/login_screen.dart';
 
 
 class PatientScreen extends StatefulWidget {
@@ -31,28 +34,54 @@ class _PatientScreenState extends State<PatientScreen> {
 
     return "Date : $day/$month/$year";
   }
-  // @override
-  // void initState() {
-  //   super.initState();
-  //
-  //
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     context.read<PatientProvider>().getPatientList();
-  //   });
-  // }
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PatientProvider>().getPatientList();
     });
   }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Future.microtask(() {
+  //     context.read<PatientProvider>().getPatientList();
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: "Patients"),
+      // appBar: const CustomAppBar(title: "Patients"),
+      appBar: CustomAppBar(
+        title: "Home Screen",
+        isHome: true,
+        onNotification: () {
+          // notification action
+        },
+        onLogout: () async {
+          bool confirmation = await myalert(
+            context,
+            "Do you want to logout?",
+          );
+
+          if (!confirmation) return;
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.clear();
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+          );
+        },
+
+      ),
+
 
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -173,31 +202,36 @@ class _PatientScreenState extends State<PatientScreen> {
                 }
 
                 return Expanded(
-                  child: ListView.builder(
-                    itemCount: provider.filteredList.length,
-                    itemBuilder: (context, index) {
-                      final patient = provider.filteredList[index];
-
-                      final treatmentNamesList = patient.patientDetails
-                          .map((e) => e.treatmentName.trim())
-                          .where((name) => name.isNotEmpty)
-                          .toList();
-
-                      final treatmentNames = treatmentNamesList.isNotEmpty
-                          ? treatmentNamesList.join(", ")
-                          : "Not under treatment";
-
-                      return PatientCard(
-                        index: index + 1,
-                        name: patient.name,
-                        treatment: treatmentNames,
-                        date:
-                        "${patient.dateAndTime.day.toString().padLeft(2, '0')}/"
-                            "${patient.dateAndTime.month.toString().padLeft(2, '0')}/"
-                            "${patient.dateAndTime.year}",
-                        staff: patient.user,
-                      );
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await context.read<PatientProvider>().getPatientList();
                     },
+                    child: ListView.builder(
+                      itemCount: provider.filteredList.length,
+                      itemBuilder: (context, index) {
+                        final patient = provider.filteredList[index];
+                    
+                        final treatmentNamesList = patient.patientDetails
+                            .map((e) => e.treatmentName.trim())
+                            .where((name) => name.isNotEmpty)
+                            .toList();
+                    
+                        final treatmentNames = treatmentNamesList.isNotEmpty
+                            ? treatmentNamesList.join(", ")
+                            : "Not under treatment";
+                    
+                        return PatientCard(
+                          index: index + 1,
+                          name: patient.name,
+                          treatment: treatmentNames,
+                          date:
+                          "${patient.dateAndTime.day.toString().padLeft(2, '0')}/"
+                              "${patient.dateAndTime.month.toString().padLeft(2, '0')}/"
+                              "${patient.dateAndTime.year}",
+                          staff: patient.user,
+                        );
+                      },
+                    ),
                   ),
                 );
               },

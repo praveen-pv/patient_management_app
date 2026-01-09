@@ -16,7 +16,7 @@ class PatientProvider extends ChangeNotifier {
   bool isLoading = false;
 
   PatientProvider() {
-    //getPatientList();
+    getPatientList();
   }
 
   Future<void> getPatientList() async {

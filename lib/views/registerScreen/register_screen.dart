@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/common/colors.dart';
 import '../../core/common/utils.dart';
+import '../../providers/authProvider/auth_provider.dart';
 import '../../providers/registerProvider/register_provider.dart';
 import '../../widgets/add_treatment_dialog.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -30,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final discountCtrl = TextEditingController();
   final advanceCtrl = TextEditingController();
   final balanceCtrl = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String paymentMode = "Cash";
   DateTime? treatmentDate;
@@ -50,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<RegisterProvider>();
       provider.getBranchReports();
-      provider.getTreatmentReports();
+       provider.getTreatmentReports();
     });
   }
 
@@ -95,210 +97,268 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       body: SingleChildScrollView(
         padding: EdgeInsets.all(29.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _label("Name"),
-            CustomTextField(hint: "Enter your full name", controller: nameCtrl),
-
-            SizedBox(height: 16.h),
-
-            _label("Whatsapp Number"),
-            CustomTextField(
-              hint: "Enter your Whatsapp number",
-              controller: phoneCtrl,
-            ),
-
-            SizedBox(height: 16.h),
-
-            _label("Address"),
-            CustomTextField(
-              hint: "Enter your full address",
-              controller: addressCtrl,
-            ),
-
-            SizedBox(height: 16.h),
-
-            _label("Location"),
-            CustomDropdownField(
-              hint: "Choose your location",
-              value: selectedLocation,
-              items: locations,
-              onChanged: (val) {
-                setState(() => selectedLocation = val);
-              },
-            ),
-
-            SizedBox(height: 16.h),
-
-            _label("Branch"),
-            Consumer<RegisterProvider>(
-              builder: (context, provider, _) {
-                if (provider.isBranchLoading) {
-                  return const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (provider.branchReportList.isEmpty) {
-                  return const Text("No branches found");
-                }
-
-                return CustomDropdownField(
-                  hint: "Select the branch",
-                  value: provider.selectedBranchName,
-                  items: provider.branchReportList
-                      .map((branch) => branch.name)
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      provider.selectBranch(value);
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _label("Name"),
+              CustomTextField(
+                  hint: "Enter your full name",
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
                     }
+          
+                    return null;
                   },
-                );
-              },
-            ),
-            SizedBox(height: 16.h),
-
-            if (selectedTreatments.isEmpty)
-              _addTreatmentButton(color: Pallette.primaryColor),
-
-            const SizedBox(height: 16),
-
-            Column(
-              children: List.generate(
-                selectedTreatments.length,
-                (index) => TreatmentCard(
-                  index: index + 1,
-                  treatment: selectedTreatments[index],
-                  onRemove: () {
-                    setState(() => selectedTreatments.removeAt(index));
-                  },
+                  controller: nameCtrl
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Whatsapp Number"),
+              CustomTextField(
+                hint: "Enter your Whatsapp number",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Whatsapp number';
+                  }
+          
+                  return null;
+                },
+                controller: phoneCtrl,
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Address"),
+              CustomTextField(
+                hint: "Enter your  address",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your address';
+                  }
+          
+                  return null;
+                },
+                controller: addressCtrl,
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Location"),
+              CustomDropdownField(
+                hint: "Choose your location",
+          
+                value: selectedLocation,
+                items: locations,
+          
+                onChanged: (val) {
+                  setState(() => selectedLocation = val);
+                },
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Branch"),
+              Consumer<RegisterProvider>(
+                builder: (context, provider, _) {
+                  if (provider.isBranchLoading) {
+                    return Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+          
+                  if (provider.branchReportList.isEmpty) {
+                    return const Text("No branches found");
+                  }
+          
+                  return CustomDropdownField(
+                    hint: "Select the branch",
+                    value: provider.selectedBranchName,
+                    items: provider.branchReportList
+                        .map((branch) => branch.name)
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        provider.selectBranch(value);
+                      }
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: 16.h),
+          
+              if (selectedTreatments.isEmpty)
+                _addTreatmentButton(color: Pallette.primaryColor),
+          
+              const SizedBox(height: 16),
+          
+              Column(
+                children: List.generate(
+                  selectedTreatments.length,
+                  (index) => TreatmentCard(
+                    index: index + 1,
+                    treatment: selectedTreatments[index],
+                    onRemove: () {
+                      setState(() => selectedTreatments.removeAt(index));
+                    },
+                  ),
                 ),
               ),
-            ),
-
-            if (selectedTreatments.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              _addTreatmentButton(color: Colors.green.shade100),
-            ],
-
-            SizedBox(height: 24.h),
-
-            _label("Total Amount"),
-            CustomTextField(
-              hint: "Enter your Total Amount",
-              controller: totalCtrl,
-            ),
-
-            SizedBox(height: 16.h),
-
-            _label("Discount Amount"),
-            CustomTextField(
-              hint: "Enter your Discount Amount",
-              controller: discountCtrl,
-            ),
-
-            SizedBox(height: 20.h),
-
-            _label("Payment Option"),
-            Row(
-              children: [
-                _paymentRadio("Cash"),
-                _paymentRadio("Card"),
-                _paymentRadio("UPI"),
+          
+              if (selectedTreatments.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _addTreatmentButton(color: Colors.green),
               ],
-            ),
+          
+              SizedBox(height: 24.h),
+          
+              _label("Total Amount"),
+              CustomTextField(
+                hint: "Enter your Total Amount",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Total Amount';
+                  }
+          
+                  return null;
+                },
+                controller: totalCtrl,
 
-            SizedBox(height: 16.h),
-
-            _label("Advance Amount"),
-            CustomTextField(
-              hint: "Enter your Advance Amount",
-              controller: advanceCtrl,
-            ),
-
-            SizedBox(height: 16.h),
-
-            _label("Balance Amount"),
-            CustomTextField(
-              hint: "Enter your Balance Amount",
-              controller: balanceCtrl,
-            ),
-
-            SizedBox(height: 20.h),
-
-            _label("Treatment Date"),
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2023),
-                  lastDate: DateTime(2030),
-                );
-                if (picked != null) {
-                  setState(() => treatmentDate = picked);
-                }
-              },
-              child: Container(
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: Pallette.bgGrey,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        treatmentDate == null
-                            ? ""
-                            : "${treatmentDate!.day.toString().padLeft(2, '0')}/"
-                                  "${treatmentDate!.month.toString().padLeft(2, '0')}/"
-                                  "${treatmentDate!.year}",
-                        style: TextStyle(fontSize: 14.sp),
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Discount Amount"),
+              CustomTextField(
+                hint: "Enter your Discount Amount",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Discount Amount';
+                  }
+          
+                  return null;
+                },
+                controller: discountCtrl,
+              ),
+          
+              SizedBox(height: 20.h),
+          
+              _label("Payment Option"),
+              Row(
+                children: [
+                  _paymentRadio("Cash"),
+                  _paymentRadio("Card"),
+                  _paymentRadio("UPI"),
+                ],
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Advance Amount"),
+              CustomTextField(
+                hint: "Enter your Advance Amount",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Advance Amount';
+                  }
+          
+                  return null;
+                },
+                controller: advanceCtrl,
+              ),
+          
+              SizedBox(height: 16.h),
+          
+              _label("Balance Amount"),
+              CustomTextField(
+                hint: "Enter your Balance Amount",
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your Balance Amount';
+                  }
+          
+                  return null;
+                },
+                controller: balanceCtrl,
+              ),
+          
+              SizedBox(height: 20.h),
+          
+              _label("Treatment Date"),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2023),
+                    lastDate: DateTime(2030),
+                  );
+                  if (picked != null) {
+                    setState(() => treatmentDate = picked);
+                  }
+                },
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: Pallette.bgGrey,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          treatmentDate == null
+                              ? ""
+                              : "${treatmentDate!.day.toString().padLeft(2, '0')}/"
+                                    "${treatmentDate!.month.toString().padLeft(2, '0')}/"
+                                    "${treatmentDate!.year}",
+                          style: TextStyle(fontSize: 14.sp),
+                        ),
                       ),
-                    ),
-                    const Icon(
-                      Icons.calendar_month,
-                      color: Pallette.primaryColor,
-                    ),
-                  ],
+                      const Icon(
+                        Icons.calendar_month,
+                        color: Pallette.primaryColor,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-
-            SizedBox(height: 20.h),
-
-            _label("Treatment Time"),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomDropdownField(
-                    hint: "Hour",
-                    value: hour,
-                    items: List.generate(12, (i) => "${i + 1}"),
-                    onChanged: (v) => setState(() => hour = v),
+          
+              SizedBox(height: 20.h),
+          
+              _label("Treatment Time"),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomDropdownField(
+                      hint: "Hour",
+                      value: hour,
+                      items: List.generate(12, (i) => "${i + 1}"),
+                      onChanged: (v) => setState(() => hour = v),
+                    ),
                   ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: CustomDropdownField(
-                    hint: "Minutes",
-                    value: minute,
-                    items: const ["00", "15", "30", "45"],
-                    onChanged: (v) => setState(() => minute = v),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: CustomDropdownField(
+                      hint: "Minutes",
+                      value: minute,
+                      items: const ["00", "15", "30", "45"],
+                      onChanged: (v) => setState(() => minute = v),
+                    ),
                   ),
-                ),
-              ],
-            ),
-
-            SizedBox(height: 30.h),
-
-            CustomButton(text: "Save", onTap: _prepareApiData),
-          ],
+                ],
+              ),
+          
+              SizedBox(height: 30.h),
+          
+              CustomButton(text: "Save", onTap: _prepareApiData),
+            ],
+          ),
         ),
       ),
     );
@@ -325,20 +385,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _prepareApiData() async {
     final provider = context.read<RegisterProvider>();
-    if (nameCtrl.text.trim().isEmpty) {
-      return showSnackBarMsg(context, "Please enter name", Colors.red);
-    }
+    final authprovider = context.read<Authprovider>();
 
-    if (phoneCtrl.text.trim().isEmpty) {
-      return showSnackBarMsg(
-        context,
-        "Please enter Whatsapp number",
-        Colors.red,
-      );
-    }
-
-    if (addressCtrl.text.trim().isEmpty) {
-      return showSnackBarMsg(context, "Please enter address", Colors.red);
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
 
     if (context.read<RegisterProvider>().selectedBranchId == null) {
@@ -378,19 +428,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     //     .map((e) => e.id)
     //     .join(",");
 
-    final male = selectedTreatments
-        .where((t) => t.male > 0)
-        .map((t) => t.id)
-        .join(",");
+    final treatmentsIds =
+    selectedTreatments.map((t) => t.id).join(",");
 
-    final female = selectedTreatments
-        .where((t) => t.female > 0)
-        .map((t) => t.id)
-        .join(",");
+    final male =
+    selectedTreatments.map((t) => t.male).join(",");
+
+    final female =
+    selectedTreatments.map((t) => t.female).join(",");
 
 
+    final excecutive = authprovider.user?.name.toString();
+    print("excecutive  $excecutive");
     final registerdata = {
       "name": nameCtrl.text.trim(),
+      //"excecutive": "test_user",
       "excecutive": "Admin",
       "phone": phoneCtrl.text.trim(),
       "address": addressCtrl.text.trim(),
@@ -401,26 +453,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "balance_amount": double.tryParse(balanceCtrl.text) ?? 0,
 
       "date_nd_time":
-      "${treatmentDate!.day.toString().padLeft(2, '0')}/"
+          "${treatmentDate!.day.toString().padLeft(2, '0')}/"
           "${treatmentDate!.month.toString().padLeft(2, '0')}/"
           "${treatmentDate!.year}-"
           "${hour!.padLeft(2, '0')}:${minute!.padLeft(2, '0')} AM",
 
       "branch": provider.selectedBranchId.toString(),
 
-      // 🔥 THIS IS THE FIX
-      "treatments": selectedTreatments.map((e) => e.id).join(","),
-      "male": male,       // "" or "2,3"
-      "female": female,   // "" or "5,6"
+      "treatments": treatmentsIds,
+      "male": male,
+      "female": female,
 
-      "id": "",
+      "id": "0",
     };
-
-
-
-
-
-
+print("registerdata $registerdata");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool confirmation = await myalert(context, "Do you want Register!");
     if (!confirmation) return;
@@ -434,26 +480,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (isregister == true) {
       showSnackBarMsg(context, 'Registered successfully!', Colors.green);
 
-      // 🔹 Navigate to PDF page FIRST
+      final List<SelectedTreatment> pdfTreatments =
+      selectedTreatments.map((t) {
+        return SelectedTreatment(
+          id: t.id,
+          name: t.name,
+          male: t.male,
+          female: t.female,
+        );
+      }).toList();
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => RegisterPdfPage(
-            registerData: registerdata,
-            treatments: selectedTreatments,
-            branchName:
-            context.read<RegisterProvider>().selectedBranchName ?? "",
+          builder: (_) => ReceiptPreviewScreen(
+            registerData: Map<String, dynamic>.from(registerdata),
+            treatments: pdfTreatments,
+            branchName: provider.selectedBranchName ?? "",
           ),
         ),
       );
+
 
 
       _clearForm();
     } else {
       showSnackBarMsg(context, "Failed to create registration", Colors.red);
     }
-
-
   }
 
   Widget _addTreatmentButton({required Color color}) {

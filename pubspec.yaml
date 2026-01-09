@@ -43,10 +43,16 @@ dependencies:
   pdf: ^3.11.3
   share_plus: ^12.0.1
   path_provider: ^2.1.5
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+
+  image_path: assets/images/applogo.png
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

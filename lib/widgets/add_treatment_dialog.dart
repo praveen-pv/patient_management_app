@@ -59,7 +59,7 @@ class _AddTreatmentDialogState extends State<AddTreatmentDialog> {
 
                   DropdownButtonFormField<int>(
                     value: selectedTreatmentId,
-                    isExpanded: true, // ✅ IMPORTANT
+                    isExpanded: true,
                     hint: const Text("Choose preferred treatment"),
                     items: provider.treatmentReportList.map((t) {
                       return DropdownMenuItem<int>(
